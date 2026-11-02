@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>劉芳君SDGs不塑永續-淨灘</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti for Victory & Special FX -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Zen Maru Gothic', sans-serif;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            background-color: #0284c7;
+        }
+
+        /* Ocean Wave Animations */
+        .ocean-gradient {
+            background: linear-gradient(180deg, #38bdf8 0%, #0284c7 60%, #0369a1 100%);
+        }
+
+        .wave {
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 1000px 1000px 0 0;
+            position: absolute;
+            width: 200%;
+            height: 48px;
+            bottom: 0;
+            animation: waveMotion 8s infinite linear;
+        }
+        .wave:nth-child(2) {
+            bottom: 10px;
+            opacity: 0.6;
+            animation: waveMotion 12s infinite linear reverse;
+        }
+
+        @keyframes waveMotion {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(-25%); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* Animations: Boat, Birds, Dolphins, Clouds */
+        @keyframes sailShip {
+            0% { transform: translateX(-120px); }
+            100% { transform: translateX(calc(100vw + 120px)); }
+        }
+        @keyframes birdFly {
+            0% { transform: translateX(-80px) translateY(0); }
+            50% { transform: translateX(50vw) translateY(-20px); }
+            100% { transform: translateX(calc(100vw + 80px)) translateY(0); }
+        }
+        @keyframes floatCloud {
+            0% { transform: translateX(-150px); }
+            100% { transform: translateX(100vw); }
+        }
+        @keyframes dolphinJump {
+            0% { transform: translate(-50px, 40px) rotate(-30deg); opacity: 0; }
+            40% { transform: translate(150px, -40px) rotate(10deg); opacity: 1; }
+            80% { transform: translate(300px, 40px) rotate(40deg); opacity: 0; }
+            100% { transform: translate(300px, 40px) rotate(40deg); opacity: 0; }
+        }
+
+        /* Sand Background */
+        .sand-gradient {
+            background: linear-gradient(180deg, #fde047 0%, #eab308 40%, #ca8a04 100%);
+        }
+
+        /* Trash Gentle Wave Drift & Magnet Effect */
+        @keyframes trashWave {
+            0%, 100% { transform: translate(0, 0) rotate(var(--rot)); }
+            50% { transform: translate(var(--dx), var(--dy)) rotate(calc(var(--rot) + 6deg)); }
+        }
+
+        .trash-item {
+            position: absolute;
+            cursor: pointer;
+            transition: transform 0.2s ease, left 0.5s ease-in-out, top 0.5s ease-in-out, opacity 0.3s;
+            animation: trashWave var(--speed) ease-in-out infinite;
+            filter: drop-shadow(2px 3px 4px rgba(0,0,0,0.25));
+        }
+        .trash-item:hover {
+            transform: scale(1.3) rotate(var(--rot)) !important;
+            filter: drop-shadow(0 0 12px rgba(255, 255, 255, 1)) brightness(1.25);
+            z-index: 50;
+        }
+
+        /* Trapped Turtle Animation */
+        @keyframes helpBlink {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px #ef4444); }
+            50% { transform: scale(1.15); filter: drop-shadow(0 0 16px #ef4444); }
+        }
+        .turtle-help {
+            animation: helpBlink 1.2s infinite ease-in-out;
+            cursor: pointer;
+        }
+
+        /* Floating Score Popups */
+        .score-pop {
+            position: absolute;
+            font-weight: 900;
+            color: #ef4444;
+            text-shadow: 2px 2px 0px #ffffff, -2px -2px 0px #ffffff, 2px -2px 0px #ffffff, -2px 2px 0px #ffffff;
+            pointer-events: none;
+            animation: popUp 0.85s ease-out forwards;
+            z-index: 100;
+        }
+
+        @keyframes popUp {
+            0% { opacity: 1; transform: translateY(0) scale(0.8); }
+            50% { opacity: 1; transform: translateY(-30px) scale(1.3); }
+            100% { opacity: 0; transform: translateY(-55px) scale(1); }
+        }
+
+        .combo-badge {
+            animation: comboBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes comboBounce {
+            0% { transform: scale(0.4); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col justify-between relative select-none">
+
+    <!-- Top Header Navigation -->
+    <header class="absolute top-0 left-0 w-full z-30 flex flex-wrap justify-between items-center px-4 sm:px-6 py-3 bg-black/30 backdrop-blur-md border-b border-white/20 text-white shadow-lg">
+        <!-- Title Left -->
+        <div class="flex items-center gap-3">
+            <div class="bg-emerald-500 p-2 rounded-xl text-white shadow">
+                <i class="fa-solid fa-earth-americas text-2xl animate-spin" style="animation-duration: 12s;"></i>
+            </div>
+            <div>
+                <h1 class="text-xl sm:text-2xl md:text-3xl font-black tracking-wide text-amber-300 drop-shadow">
+                    劉芳君SDGs不塑永續-淨灘
+                </h1>
+                <p class="text-xs text-sky-200 hidden sm:block">SDGs Goal 14: 保育海洋與保育陸域生態</p>
+            </div>
+        </div>
+
+        <!-- Right Indicators (Score, Combo, Highscore) -->
+        <div class="flex items-center gap-2 sm:gap-4 mt-2 sm:mt-0">
+            <!-- Combo Notification -->
+            <div id="comboContainer" class="hidden flex items-center gap-1 bg-gradient-to-r from-amber-500 to-red-500 text-white px-3 py-1 rounded-full text-xs sm:text-sm font-black shadow-lg combo-badge">
+                <i class="fa-solid fa-bolt text-yellow-200 animate-bounce"></i>
+                <span id="comboText">2x COMBO!</span>
+            </div>
+
+            <!-- SDGs Turtle Health Index -->
+            <div class="flex items-center gap-1.5 bg-emerald-900/70 px-3 py-1.5 rounded-xl border border-emerald-400/40 shadow-inner">
+                <i class="fa-solid fa-heart text-pink-400 text-base animate-pulse"></i>
+                <span class="text-xs text-emerald-200 hidden md:inline">永續指數:</span>
+                <span id="healthScore" class="text-sm sm:text-base font-black text-pink-300">100%</span>
+            </div>
+
+            <!-- Remaining Trash -->
+            <div class="flex items-center gap-1.5 bg-sky-900/70 px-3 py-1.5 rounded-xl border border-sky-400/40 shadow-inner">
+                <i class="fa-solid fa-dumpster text-sky-300 text-base"></i>
+                <span id="trashCount" class="text-sm sm:text-base font-black text-white">50/50</span>
+            </div>
+
+            <!-- Score & High Score -->
+            <div class="flex items-center gap-2 bg-amber-900/70 px-3.5 py-1.5 rounded-xl border border-amber-400/40 shadow-inner">
+                <i class="fa-solid fa-trophy text-amber-300 text-lg"></i>
+                <div class="flex flex-col text-right">
+                    <span id="scoreDisplay" class="text-base sm:text-lg font-black text-amber-300 leading-none">0</span>
+                    <span class="text-[10px] text-amber-200/80">最高: <span id="highScore">0</span></span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Upper Half: Ocean & Sky Scene -->
+    <div class="w-full h-[38vh] ocean-gradient relative overflow-hidden">
+        
+        <!-- Sun (Top-Right) -->
+        <div class="absolute top-16 right-8 w-20 h-20 text-amber-300 opacity-95 drop-shadow-[0_0_25px_rgba(253,224,71,0.9)] pointer-events-none">
+            <svg viewBox="0 0 100 100" class="w-full h-full">
+                <circle cx="50" cy="50" r="30" fill="#fde047"/>
+                <g stroke="#f59e0b" stroke-width="4" stroke-linecap="round">
+                    <line x1="50" y1="6" x2="50" y2="15"/><line x1="50" y1="85" x2="50" y2="94"/>
+                    <line x1="6" y1="50" x2="15" y2="50"/><line x1="85" y1="50" x2="94" y2="50"/>
+                    <line x1="18" y1="18" x2="25" y2="25"/><line x1="75" y1="75" x2="82" y2="82"/>
+                    <line x1="18" y1="82" x2="25" y2="75"/><line x1="75" y1="25" x2="82" y2="18"/>
+                </g>
+            </svg>
+        </div>
+
+        <!-- Clouds -->
+        <div class="absolute top-14 left-0 text-white/80 pointer-events-none" style="animation: floatCloud 36s linear infinite;">
+            <i class="fa-solid fa-cloud text-5xl"></i>
+        </div>
+        <div class="absolute top-24 left-0 text-white/60 pointer-events-none" style="animation: floatCloud 48s linear infinite; animation-delay: -18s;">
+            <i class="fa-solid fa-cloud text-6xl"></i>
+        </div>
+
+        <!-- Birds -->
+        <div class="absolute top-20 left-0 flex gap-4 text-slate-800/70 pointer-events-none" style="animation: birdFly 24s linear infinite;">
+            <i class="fa-solid fa-crow text-xl"></i>
+            <i class="fa-solid fa-crow text-lg -mt-3"></i>
+        </div>
+
+        <!-- Jumping Dolphin Animation -->
+        <div class="absolute bottom-12 left-1/4 w-20 h-16 pointer-events-none" style="animation: dolphinJump 14s ease-in-out infinite;">
+            <svg viewBox="0 0 64 48" class="w-full h-full drop-shadow">
+                <path d="M4 32 C 16 12, 36 8, 56 20 C 44 22, 36 28, 28 40 C 20 36, 12 36, 4 32 Z" fill="#ec4899"/>
+                <path d="M 32 16 L 40 4 L 40 18 Z" fill="#db2777"/>
+                <circle cx="48" cy="18" r="2" fill="#ffffff"/>
+            </svg>
+        </div>
+
+        <!-- Sailing Boat -->
+        <div class="absolute bottom-8 left-0 w-20 h-16 pointer-events-none drop-shadow-lg" style="animation: sailShip 32s linear infinite;">
+            <svg viewBox="0 0 100 80" class="w-full h-full">
+                <path d="M 15 55 C 25 68, 75 68, 85 55 Z" fill="#78350f"/>
+                <rect x="47" y="12" width="4" height="44" fill="#451a03"/>
+                <path d="M 51 16 L 85 45 L 51 45 Z" fill="#ffffff"/>
+                <path d="M 45 20 L 18 45 L 45 45 Z" fill="#38bdf8"/>
+            </svg>
+        </div>
+
+        <!-- Waves -->
+        <div class="wave"></div>
+        <div class="wave"></div>
+    </div>
+
+    <!-- Lower Half: Interactive Sand Beach -->
+    <main id="beachArea" class="w-full h-[62vh] sand-gradient relative overflow-hidden shadow-2xl border-t-2 border-amber-200/40">
+        <!-- Volunteers & Decorative Shells -->
+        <div class="absolute bottom-4 left-6 flex items-center gap-2 bg-white/40 px-3 py-1 rounded-full backdrop-blur-sm pointer-events-none">
+            <i class="fa-solid fa-person-shelter text-emerald-700 text-lg"></i>
+            <span class="text-xs font-bold text-slate-800">淨灘志工隊執行中</span>
+        </div>
+        <div class="absolute bottom-8 right-12 text-pink-300 text-2xl rotate-12 opacity-80 pointer-events-none">
+            <i class="fa-solid fa-fan"></i>
+        </div>
+
+        <!-- Animated Crab Patrol -->
+        <div class="absolute bottom-6 right-28 pointer-events-none transition-all duration-1000" id="crabEl">
+            <svg viewBox="0 0 50 35" class="w-9 h-7 drop-shadow">
+                <ellipse cx="25" cy="20" rx="14" ry="10" fill="#ef4444"/>
+                <circle cx="18" cy="12" r="2.5" fill="#ffffff"/><circle cx="18" cy="12" r="1.2" fill="#000000"/>
+                <circle cx="32" cy="12" r="2.5" fill="#ffffff"/><circle cx="32" cy="12" r="1.2" fill="#000000"/>
+                <path d="M 12 16 Q 4 10 6 4 Q 14 6 14 14" fill="#dc2626"/>
+                <path d="M 38 16 Q 46 10 44 4 Q 36 6 36 14" fill="#dc2626"/>
+            </svg>
+        </div>
+
+        <!-- Trash & Interactive Container -->
+        <div id="trashContainer" class="absolute inset-0"></div>
+    </main>
+
+    <!-- SDGs Quiz Modal -->
+    <div id="quizModal" class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex justify-center items-center hidden">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-11/12 text-center shadow-2xl border-4 border-sky-400 transform transition-all">
+            <div class="w-16 h-16 bg-sky-100 rounded-full flex items-center justify-center mx-auto mb-3 text-sky-600 text-3xl shadow-inner">
+                <i class="fa-solid fa-envelope-open-text"></i>
+            </div>
+            <h3 class="text-xs font-bold text-sky-600 uppercase tracking-widest mb-1">SDGs 減塑瓶中信問答</h3>
+            <h2 id="quizQuestion" class="text-lg sm:text-xl font-black text-slate-800 mb-6">題目載入中...</h2>
+            
+            <div id="quizOptions" class="flex flex-col gap-3"></div>
+        </div>
+    </div>
+
+    <!-- Victory Modal -->
+    <div id="successModal" class="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex justify-center items-center hidden">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-11/12 text-center shadow-2xl border-4 border-amber-300 transform transition-all">
+            <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3 text-amber-500 text-4xl shadow-inner">
+                <i class="fa-solid fa-award animate-bounce"></i>
+            </div>
+            <h2 class="text-3xl font-black text-slate-800 mb-1">任務成功！</h2>
+            <p class="text-xs text-slate-500 font-bold mb-4">劉芳君SDGs不塑永續-淨灘榮譽認證</p>
+            
+            <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-4 mb-5 border border-amber-200 text-left">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs font-bold text-slate-600">最終獲得總分</span>
+                    <span id="finalScore" class="text-3xl font-black text-amber-600">0</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-bold text-slate-600">減塑大使評等</span>
+                    <span id="rankBadge" class="px-3 py-1 bg-amber-500 text-white rounded-full font-black text-sm shadow">S級 不塑永續大師</span>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="resetGame()" class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black py-3 px-4 rounded-2xl shadow-lg active:scale-95 transition text-base flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-circle-play"></i> 前往下一關
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        let score = 0;
+        let remainingTrash = 50;
+        const totalTrash = 50;
+        let comboCount = 0;
+        let lastClickTime = 0;
+        const comboTimeout = 1400;
+        let highScore = localStorage.getItem('sdgs_high_score') || 0;
+
+        // SDGs Quiz Questions Database
+        const quizList = [
+            { q: "塑膠瓶在自然環境中完全分解大約需要多久？", options: ["10年", "100年", "450年", "1000年"], ans: 2 },
+            { q: "SDGs目標14主要關注的是什麼主題？", options: ["陸域生態", "保育海洋生態", "氣候變遷", "清潔飲水"], ans: 1 },
+            { q: "日常生活中哪種行為能最有效減少海洋垃圾？", options: ["隨手丟棄", "自備環保餐具與杯子", "多用一次性餐具", "焚燒塑膠"], ans: 1 }
+        ];
+
+        // Trash Definitions with custom graphics
+        const trashTypes = [
+            { name: '保特瓶', points: 10, size: 36, svg: `<svg viewBox="0 0 64 64" class="w-full h-full"><path d="M26 8h12v6H26z" fill="#93c5fd"/><path d="M18 20c0-2 4-4 14-4s14 2 14 4v34c0 4-4 6-14 6S18 58 18 54V20z" fill="#60a5fa" opacity="0.9"/><path d="M22 26h20v10H22z" fill="#2563eb"/></svg>` },
+            { name: '紙餐盒', points: 15, size: 42, svg: `<svg viewBox="0 0 64 64" class="w-full h-full"><path d="M8 24l24-10 24 10-24 10L8 24z" fill="#fde68a"/><path d="M8 24l24 10v20L8 44V24z" fill="#d97706"/><path d="M56 24L32 34v20l24-10V24z" fill="#b45309"/></svg>` },
+            { name: '塑膠袋', points: 12, size: 40, svg: `<svg viewBox="0 0 64 64" class="w-full h-full"><path d="M16 18c0-6 6-10 16-10s16 4 16 10v10H16V18z" stroke="#cbd5e1" stroke-width="4" fill="none"/><path d="M12 24c0 0-4 12 2 24s20 10 36 2c8-8 2-26 2-26H12z" fill="#f1f5f9" opacity="0.85"/></svg>` },
+            { name: '保麗龍', points: 20, size: 46, svg: `<svg viewBox="0 0 64 64" class="w-full h-full"><rect x="8" y="16" width="48" height="32" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/><circle cx="20" cy="28" r="3" fill="#e2e8f0"/><circle cx="36" cy="36" r="4" fill="#e2e8f0"/></svg>` },
+            { name: '飲料杯', points: 8, size: 34, svg: `<svg viewBox="0 0 64 64" class="w-full h-full"><path d="M16 16h32l-4 40H20L16 16z" fill="#f472b6"/><path d="M12 12h40v5H12z" fill="#db2777"/><path d="M34 4l-4 20" stroke="#f43f5e" stroke-width="4"/></svg>` },
+            { name: '漂流木', points: 25, size: 48, svg: `<svg viewBox="0 0 64 64" class="w-full h-full"><path d="M6 36c10-6 22 2 36-4s12-8 16-4c4 4-2 10-10 12s-28-2-36 4-8-4-6-8z" fill="#78350f"/><path d="M18 34c4-2 8 0 14-2" stroke="#451a03" stroke-width="2"/></svg>` }
+        ];
+
+        // Web Audio API Synthesizer
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            if (type === 'pickup') {
+                osc.type = 'sine';
+                const freq = 440 + (comboCount * 50);
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(freq * 1.4, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            } else if (type === 'save') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+                osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+            } else if (type === 'magnet') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 0.25);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+            }
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.35);
+        }
+
+        // Initialize Game Board
+        function initGame() {
+            score = 0;
+            remainingTrash = totalTrash;
+            comboCount = 0;
+            document.getElementById('highScore').innerText = highScore;
+            updateUI();
+            
+            const container = document.getElementById('trashContainer');
+            container.innerHTML = '';
+            document.getElementById('successModal').classList.add('hidden');
+
+            const width = container.clientWidth || window.innerWidth;
+            const height = container.clientHeight || (window.innerHeight * 0.6);
+
+            // 1. Generate Trapped Turtle Special Event
+            createTrappedTurtle(container, width, height);
+
+            // 2. Generate SDGs Bottle Mail Special Event
+            createBottleMail(container, width, height);
+
+            // 3. Generate Magnet Powerup
+            createMagnetPowerup(container, width, height);
+
+            // 4. Generate 50 Random Trash Items
+            for (let i = 0; i < totalTrash; i++) {
+                const type = trashTypes[Math.floor(Math.random() * trashTypes.length)];
+                const item = document.createElement('div');
+                item.className = 'trash-item';
+                
+                const posX = 30 + Math.random() * (width - 80 - type.size);
+                const posY = 30 + Math.random() * (height - 80 - type.size);
+                const rotation = Math.floor(Math.random() * 360);
+                
+                item.style.left = `${posX}px`;
+                item.style.top = `${posY}px`;
+                item.style.width = `${type.size}px`;
+                item.style.height = `${type.size}px`;
+                item.style.setProperty('--rot', `${rotation}deg`);
+                item.style.setProperty('--dx', `${(Math.random() * 12 - 6).toFixed(1)}px`);
+                item.style.setProperty('--dy', `${(Math.random() * 10 - 5).toFixed(1)}px`);
+                item.style.setProperty('--speed', `${(3 + Math.random() * 3).toFixed(2)}s`);
+                
+                item.innerHTML = type.svg;
+
+                item.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
+                    collectTrash(item, type, e.clientX, e.clientY);
+                });
+
+                container.appendChild(item);
+            }
+        }
+
+        // Trapped Turtle Feature
+        function createTrappedTurtle(container, w, h) {
+            const turtle = document.createElement('div');
+            turtle.className = 'absolute turtle-help transition-all z-20';
+            turtle.style.left = `${60 + Math.random() * (w - 140)}px`;
+            turtle.style.top = `${40 + Math.random() * (h - 100)}px`;
+            turtle.style.width = '54px';
+            turtle.style.height = '54px';
+            turtle.innerHTML = `
+                <svg viewBox="0 0 64 64" class="w-full h-full drop-shadow-lg">
+                    <ellipse cx="32" cy="34" rx="20" ry="16" fill="#15803d"/>
+                    <circle cx="50" cy="34" r="7" fill="#22c55e"/>
+                    <circle cx="52" cy="32" r="1.5" fill="#000000"/>
+                    <path d="M 12 20 L 52 48 M 16 48 L 48 20" stroke="#ef4444" stroke-width="3.5" stroke-linecap="round"/>
+                </svg>
+            `;
+            turtle.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                playSound('save');
+                confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
+                showScorePop(e.clientX, e.clientY, '🐢 成功救援! +50', true);
+                score += 50;
+                updateUI();
+                turtle.remove();
+            });
+            container.appendChild(turtle);
+        }
+
+        // SDGs Bottle Mail Quiz Feature
+        function createBottleMail(container, w, h) {
+            const bottle = document.createElement('div');
+            bottle.className = 'absolute cursor-pointer transition-all z-20 hover:scale-125';
+            bottle.style.left = `${60 + Math.random() * (w - 140)}px`;
+            bottle.style.top = `${40 + Math.random() * (h - 100)}px`;
+            bottle.style.width = '42px';
+            bottle.style.height = '42px';
+            bottle.innerHTML = `
+                <svg viewBox="0 0 64 64" class="w-full h-full drop-shadow">
+                    <path d="M 28 8 H 36 V 16 H 28 Z" fill="#b45309"/>
+                    <path d="M 20 20 C 20 16, 44 16, 44 20 V 52 C 44 58, 20 58, 20 52 Z" fill="#38bdf8" opacity="0.8"/>
+                    <rect x="26" y="28" width="12" height="18" fill="#fef08a" rx="2"/>
+                </svg>
+            `;
+            bottle.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                openQuizModal(bottle);
+            });
+            container.appendChild(bottle);
+        }
+
+        // Magnet Powerup Feature
+        function createMagnetPowerup(container, w, h) {
+            const mag = document.createElement('div');
+            mag.className = 'absolute cursor-pointer transition-all z-20 hover:scale-125 animate-bounce';
+            mag.style.left = `${60 + Math.random() * (w - 140)}px`;
+            mag.style.top = `${40 + Math.random() * (h - 100)}px`;
+            mag.style.width = '44px';
+            mag.style.height = '44px';
+            mag.innerHTML = `
+                <svg viewBox="0 0 64 64" class="w-full h-full drop-shadow">
+                    <path d="M 16 12 V 32 C 16 42, 48 42, 48 32 V 12 H 36 V 30 C 36 34, 28 34, 28 30 V 12 Z" fill="#ef4444"/>
+                    <rect x="16" y="12" width="12" height="8" fill="#e2e8f0"/>
+                    <rect x="36" y="12" width="12" height="8" fill="#e2e8f0"/>
+                </svg>
+            `;
+            mag.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                playSound('magnet');
+                showScorePop(e.clientX, e.clientY, '🧲 磁鐵吸附特效!', true);
+                activateMagnet(e.clientX, e.clientY);
+                mag.remove();
+            });
+            container.appendChild(mag);
+        }
+
+        // Activate Magnet to collect 5 nearby trash
+        function activateMagnet(cx, cy) {
+            const items = Array.from(document.querySelectorAll('.trash-item')).slice(0, 5);
+            items.forEach((item, index) => {
+                setTimeout(() => {
+                    item.style.left = `${cx - 20}px`;
+                    item.style.top = `${cy - 20}px`;
+                    setTimeout(() => item.dispatchEvent(new Event('pointerdown')), 200);
+                }, index * 100);
+            });
+        }
+
+        // Open Quiz Modal
+        function openQuizModal(bottleEl) {
+            const quiz = quizList[Math.floor(Math.random() * quizList.length)];
+            document.getElementById('quizQuestion').innerText = quiz.q;
+            const optionsEl = document.getElementById('quizOptions');
+            optionsEl.innerHTML = '';
+
+            quiz.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full py-3 px-4 rounded-xl bg-slate-100 hover:bg-sky-500 hover:text-white font-bold text-slate-700 transition text-left border border-slate-200';
+                btn.innerText = `${idx + 1}. ${opt}`;
+                btn.onclick = () => {
+                    if (idx === quiz.ans) {
+                        score += 30;
+                        showScorePop(window.innerWidth / 2, window.innerHeight / 2, '🎉 答對了! +30分', true);
+                        playSound('save');
+                    } else {
+                        showScorePop(window.innerWidth / 2, window.innerHeight / 2, '答錯囉！繼續加油');
+                    }
+                    document.getElementById('quizModal').classList.add('hidden');
+                    bottleEl.remove();
+                    updateUI();
+                };
+                optionsEl.appendChild(btn);
+            });
+
+            document.getElementById('quizModal').classList.remove('hidden');
+        }
+
+        // Collect Single Trash
+        function collectTrash(element, type, clickX, clickY) {
+            const now = Date.now();
+            if (now - lastClickTime < comboTimeout) {
+                comboCount++;
+            } else {
+                comboCount = 1;
+            }
+            lastClickTime = now;
+
+            const multiplier = comboCount > 1 ? Math.min(comboCount, 5) : 1;
+            const earnedPoints = type.points * multiplier;
+            score += earnedPoints;
+            remainingTrash--;
+
+            playSound('pickup');
+            showScorePop(clickX, clickY, `+${earnedPoints}`, multiplier > 1);
+
+            element.style.transform = 'scale(0) rotate(180deg)';
+            element.style.opacity = '0';
+            setTimeout(() => element.remove(), 150);
+
+            updateUI();
+
+            if (remainingTrash <= 0) {
+                setTimeout(() => {
+                    if (score > highScore) {
+                        highScore = score;
+                        localStorage.setItem('sdgs_high_score', highScore);
+                    }
+                    confetti({ particleCount: 120, spread: 90 });
+                    document.getElementById('finalScore').innerText = score;
+                    
+                    const rankEl = document.getElementById('rankBadge');
+                    if (score >= 600) rankEl.innerText = "S級 不塑永續大師 🏆";
+                    else if (score >= 450) rankEl.innerText = "A級 淨灘勇士 🌟";
+                    else rankEl.innerText = "B級 減塑衛士 🌿";
+
+                    document.getElementById('successModal').classList.remove('hidden');
+                }, 400);
+            }
+        }
+
+        // Floating Score Text
+        function showScorePop(x, y, text, isCombo) {
+            const pop = document.createElement('div');
+            pop.className = 'score-pop text-base sm:text-xl font-black';
+            if (isCombo) {
+                pop.classList.add('text-amber-500');
+                pop.innerText = `${text} (${comboCount}x COMBO!)`;
+            } else {
+                pop.innerText = text;
+            }
+            pop.style.left = `${x - 20}px`;
+            pop.style.top = `${y - 30}px`;
+            document.body.appendChild(pop);
+            setTimeout(() => pop.remove(), 850);
+        }
+
+        // UI Updates
+        function updateUI() {
+            document.getElementById('scoreDisplay').innerText = score;
+            document.getElementById('trashCount').innerText = `${remainingTrash}/${totalTrash}`;
+            
+            const comboEl = document.getElementById('comboContainer');
+            if (comboCount > 1 && (Date.now() - lastClickTime < comboTimeout)) {
+                comboEl.classList.remove('hidden');
+                document.getElementById('comboText').innerText = `${comboCount}x COMBO!`;
+            } else {
+                comboEl.classList.add('hidden');
+            }
+        }
+
+        function resetGame() {
+            initGame();
+        }
+
+        // Crab Patrol Movement
+        setInterval(() => {
+            const crab = document.getElementById('crabEl');
+            if (crab) {
+                const moveX = (Math.random() * 50 - 25).toFixed(0);
+                crab.style.transform = `translateX(${moveX}px)`;
+            }
+        }, 2200);
+
+        window.onload = initGame;
+    </script>
+</body>
+</html>
